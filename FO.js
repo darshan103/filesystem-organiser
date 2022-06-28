@@ -6,6 +6,13 @@ let input = process.argv.slice(2)
 let inputArr = input 
 let command = inputArr[0];
 
+let types = {
+    media: ["mp4", "mkv", "mp3","jpeg","jpg"],
+    archives: ["zip", "7z", "rar", "tar", "gz", "ar", "iso", "xz"],
+    documents: ["docx","doc","pdf","xlsx","xls","odt","ods","odp","odg","odf","txt","ps","tex",],
+    app: ["exe", "dmg", "pkg", "deb"],
+};
+
 switch(command){
     case 'tree':
         console.log('Tree Implemented')
@@ -55,5 +62,41 @@ function organiseFn(dirPath){
     else{
         console.log("Please Enter a Valid Path")
     } 
+
+    organiseHelper(dirPath,destPath)
 }
 
+function organiseHelper(src,dest){
+    let childNames = fs.readdirSync(src)
+    // console.log(childNames)
+
+    for(let i=0; i<childNames.length; i++){
+        let childAddress = path.join(src, childNames[i])
+        // console.log(childAddress)
+
+        let isFile = fs.lstatSync(childAddress).isFile()
+        if(isFile==true){
+            // console.log(childAddress)
+            let fileCategory = getCategory(childNames[i])
+            console.log(childNames[i]+' belongs to '+ fileCategory)
+        }
+    }
+}
+
+function getCategory(fileName){
+    // we extracted the extension name of target files
+    let ext = path.extname(fileName).slice(1)
+    console.log(ext)
+
+    for(let type in types){
+        // we look for all the category type ARRAYs here
+        let cTypeArr = types[type]
+        console.log(cTypeArr)
+
+        for(let i=0; i<cTypeArr.length; i++){
+            if(ext == cTypeArr[i]){
+                return type
+            }
+        }
+    }
+}
