@@ -67,18 +67,24 @@ function organiseFn(dirPath){
 }
 
 function organiseHelper(src,dest){
+    // It reads the content in the src(i.e dirPath)
     let childNames = fs.readdirSync(src)
     // console.log(childNames)
 
     for(let i=0; i<childNames.length; i++){
+        // It joins (src & childNames with index) and gives 
+        // child addresses for each childNames
         let childAddress = path.join(src, childNames[i])
         // console.log(childAddress)
 
+        // If file exist then return true otherwise return false
+        // lstatSync gives stats for each childAddress and isFile
+        // function is applied with lstatSync
         let isFile = fs.lstatSync(childAddress).isFile()
         if(isFile==true){
             // console.log(childAddress)
             let fileCategory = getCategory(childNames[i])
-            console.log(childNames[i]+' belongs to '+ fileCategory)
+            sendFiles(childAddress,dest,fileCategory)
         }
     }
 }
@@ -86,12 +92,12 @@ function organiseHelper(src,dest){
 function getCategory(fileName){
     // we extracted the extension name of target files
     let ext = path.extname(fileName).slice(1)
-    console.log(ext)
+    // console.log(ext)
 
     for(let type in types){
         // we look for all the category type ARRAYs here
         let cTypeArr = types[type]
-        console.log(cTypeArr)
+        // console.log(cTypeArr)
 
         for(let i=0; i<cTypeArr.length; i++){
             if(ext == cTypeArr[i]){
@@ -99,4 +105,21 @@ function getCategory(fileName){
             }
         }
     }
+} 
+
+function sendFiles(srcfilePath, dest, fileCategory){
+    // We will create path for each category type encountered to create folders of their names
+    let catPath = path.join(dest, fileCategory)
+    if(fs.existsSync(catPath)==false){
+        fs.mkdirSync(catPath)
+    }
+
+    // We tookout the basename of all the files
+    let fileName = path.basename(srcfilePath)
+    let destfilePath = path.join(catPath, fileName)
+    fs.copyFileSync(srcfilePath, destfilePath)
+    
+    // It deletes the files in targeted folder
+    fs.unlinkSync(srcfilePath)
+    console.log('Files Organised')
 }
