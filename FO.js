@@ -2,7 +2,7 @@
 const fs = require('fs')
 const path = require('path')
 
-let input = process.argv.slice(2)
+let input = process.argv.slice(2)  //Commandline se input lene ke liye or yeh ek array ki form me liya jata h
 let inputArr = input 
 let command = inputArr[0];
 
@@ -15,7 +15,7 @@ let types = {
 
 switch(command){
     case 'tree':
-        console.log('Tree Implemented')
+        treeFn(inputArr[1])
         break;
     case 'organise':
         organiseFn(inputArr[1])
@@ -76,6 +76,7 @@ function organiseHelper(src,dest){
         // child addresses for each childNames
         let childAddress = path.join(src, childNames[i])
         // console.log(childAddress)
+        // console.log(childNames[i])
 
         // If file exist then return true otherwise return false
         // lstatSync gives stats for each childAddress and isFile
@@ -112,14 +113,48 @@ function sendFiles(srcfilePath, dest, fileCategory){
     let catPath = path.join(dest, fileCategory)
     if(fs.existsSync(catPath)==false){
         fs.mkdirSync(catPath)
+        // console.log(catPath)
     }
 
     // We tookout the basename of all the files
     let fileName = path.basename(srcfilePath)
     let destfilePath = path.join(catPath, fileName)
     fs.copyFileSync(srcfilePath, destfilePath)
-    
+
     // It deletes the files in targeted folder
     fs.unlinkSync(srcfilePath)
     console.log('Files Organised')
+}
+
+function treeFn(dirPath){
+    if(dirPath==undefined){
+        console.log("Please enter a valid path : ")
+        return
+    }
+    else{
+        let doesExist = fs.existsSync(dirPath)
+        if(doesExist == true){
+            treeHelper(dirPath,' ')
+        }
+    }
+}
+
+function treeHelper(targetPath, indent){
+
+    isFile = fs.lstatSync(targetPath).isFile()
+
+    if(isFile==true){
+        let fileName = path.basename(targetPath)
+        console.log(indent + "├── " + fileName)
+    }
+    else{
+        let dirName = path.basename(targetPath)
+        console.log(indent+ "└──" +dirName)
+
+        let children = fs.readdirSync(targetPath)
+        for(let i=0; i<children.length; i++){
+            let childpath = path.join(targetPath, children[i])
+            treeHelper(childpath, indent+"\t")
+        }
+    }
 }
